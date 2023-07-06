@@ -414,13 +414,13 @@ def already_installed():
 def download_install_cc():
     print("Installing Azure CycleCloud server")
 
-    if "ubuntu" in str(platform.platform()).lower():
+    if "ubuntu" in str(platform.version()).lower():
         _catch_sys_error(["apt", "install", "-y", "cyclecloud8"])
     else:
         _catch_sys_error(["yum", "install", "-y", "cyclecloud8"])
 
 def configure_msft_repos():
-    if "ubuntu" in str(platform.platform()).lower():
+    if "ubuntu" in str(platform.version()).lower():
         configure_msft_apt_repos()
     else:
         configure_msft_yum_repos()
@@ -471,7 +471,7 @@ def install_pre_req():
     # not strictly needed, but it's useful to have the AZ CLI
     # Taken from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum?view=azure-cli-latest
 
-    if "ubuntu" in str(platform.platform()).lower():
+    if "ubuntu" in str(platform.version()).lower():
         _catch_sys_error(["apt", "update", "-y"])
         _catch_sys_error(["apt", "install", "-y", "openjdk-8-jre-headless"])
         _catch_sys_error(["apt", "install", "-y", "unzip"])
