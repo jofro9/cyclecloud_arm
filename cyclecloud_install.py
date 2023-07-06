@@ -432,10 +432,12 @@ def configure_msft_apt_repos():
     _catch_sys_error(
         ["apt-key", "add", "/tmp/microsoft.asc"])
     
-    # lsb_release = _catch_sys_error(["lsb_release", "-cs"]).decode("utf-8").strip()
-    lsb_release = "bionic"
+    lsb_release = _catch_sys_error(["lsb_release", "-cs"]).decode("utf-8").strip()
+
     with open('/etc/apt/sources.list.d/azure-cli.list', 'w') as f:
         f.write("deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {} main".format(lsb_release))
+
+    lsb_release = "bionic"
 
     with open('/etc/apt/sources.list.d/cyclecloud.list', 'w') as f:
         f.write("deb [arch=amd64] https://packages.microsoft.com/repos/cyclecloud {} main".format(lsb_release))
