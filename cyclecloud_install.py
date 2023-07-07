@@ -8,7 +8,7 @@ import random
 import platform
 from string import ascii_uppercase, ascii_lowercase, digits
 import subprocess
-from subprocess import CalledProcessError, check_output
+from subprocess import CalledProcessError, check_output, run
 from os import path, listdir, chdir, fdopen, remove
 from urllib.request import urlopen, Request
 from shutil import rmtree, copy2, move
@@ -25,20 +25,9 @@ cs_cmd = cycle_root + "/cycle_server"
 def clean_up():
     rmtree(tmpdir)
 
-# def _catch_sys_error(cmd_list):
-#     try:
-#         output = check_output(cmd_list)
-#         print(cmd_list)
-#         print(output)
-#         return output
-#     except CalledProcessError as e:
-#         print("Error with cmd: %s" % e.cmd)
-#         print("Output: %s" % e.output)
-#         raise
-
 def _catch_sys_error(cmd_list):
     try:
-        output = check_output(cmd_list, shell=True, stderr=subprocess.STDOUT)
+        output = check_output(cmd_list)
         print(cmd_list)
         print(output)
         return output
@@ -273,7 +262,7 @@ def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
     password_flag = ("--password=%s" % cyclecloud_admin_pw)
 
     print("Initializing cylcecloud CLI")
-    _catch_sys_error(["/usr/local/bin/cyclecloud", "initialize", "--loglevel=debug", "--batch", "--force",
+    run(["/usr/local/bin/cyclecloud", "initialize", "--loglevel=debug", "--batch", "--force",
                       "--url=https://localhost:{}".format(webserver_port), "--verify-ssl=false", "--username=%s" % admin_user, password_flag])
 
 
