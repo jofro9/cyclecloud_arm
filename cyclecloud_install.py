@@ -480,6 +480,7 @@ def install_pre_req():
         _catch_sys_error(["apt", "install", "-y", "unzip"])
         _catch_sys_error(["apt", "install", "-y", "python3-venv"])
         _catch_sys_error(["apt", "install", "-y", "azure-cli"])
+        _catch_sys_error(["apt", "install", "-y", "apt-transport-https"])
     else:
         _catch_sys_error(["yum", "install", "-y", "java-1.8.0-openjdk-headless"])
         _catch_sys_error(["yum", "install", "-y", "azure-cli"])
