@@ -405,7 +405,7 @@ def install_cc_cli():
         if path.isdir(cli_install_dir) and re.match("cyclecloud-cli-installer", cli_install_dir):
             print("Found CLI install DIR %s" % cli_install_dir)
             chdir(cli_install_dir)
-            _catch_sys_error(["./install.sh", "--system"])
+            run(["./install.sh", "--system"])
 
 
 def already_installed():
