@@ -400,7 +400,9 @@ def install_cc_cli():
 
     print("Unzip and install CLI")
     chdir(tmpdir)
-    _catch_sys_error(["unzip", "/opt/cycle_server/tools/cyclecloud-cli.zip"])
+    run(["apt", "update", "-y"])
+    run(["apt", "install", "unzip"])
+    run(["unzip", "/opt/cycle_server/tools/cyclecloud-cli.zip"])
     for cli_install_dir in listdir("."):
         if path.isdir(cli_install_dir) and re.match("cyclecloud-cli-installer", cli_install_dir):
             print("Found CLI install DIR %s" % cli_install_dir)
@@ -478,7 +480,6 @@ def install_pre_req():
     if "ubuntu" in str(platform.version()).lower():
         run(["apt", "update", "-y"])
         run(["apt", "install", "-y", "openjdk-8-jre-headless"])
-        run(["apt", "install", "-y", "unzip"])
         run(["apt", "install", "-y", "python3-venv"])
         run(["apt", "install", "-y", "azure-cli"])
     else:
