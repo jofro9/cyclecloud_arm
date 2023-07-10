@@ -587,10 +587,10 @@ def main():
     args = parser.parse_args()
 
     print("Debugging arguments: %s" % args)
+    install_pre_req()
 
     if not already_installed():
         configure_msft_repos()
-        install_pre_req()
         download_install_cc()
         modify_cs_config(options = {'webServerMaxHeapSize': args.webServerMaxHeapSize,
                                     'webServerPort': args.webServerPort,
