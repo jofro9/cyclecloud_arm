@@ -476,7 +476,6 @@ def install_pre_req():
     # Taken from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum?view=azure-cli-latest
 
     if "ubuntu" in str(platform.version()).lower():
-        _catch_sys_error(["apt", "install", "-y", "apt-transport-https"])
         _catch_sys_error(["apt", "update", "-y"])
         _catch_sys_error(["apt", "install", "-y", "openjdk-8-jre-headless"])
         _catch_sys_error(["apt", "install", "-y", "unzip"])
