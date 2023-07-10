@@ -477,11 +477,11 @@ def install_pre_req():
 
     if "ubuntu" in str(platform.version()).lower():
         _catch_sys_error(["apt-get", "update", "-y"])
+        _catch_sys_error(["apt-get", "install", "-y", "apt-transport-https"])
         _catch_sys_error(["apt-get", "install", "-y", "openjdk-8-jdk"])
         _catch_sys_error(["apt-get", "install", "-y", "unzip"])
         _catch_sys_error(["apt-get", "install", "-y", "python3-venv"])
         _catch_sys_error(["apt-get", "install", "-y", "azure-cli"])
-        _catch_sys_error(["apt-get", "install", "-y", "apt-transport-https"])
     else:
         _catch_sys_error(["yum", "install", "-y", "java-1.8.0-openjdk-headless"])
         _catch_sys_error(["yum", "install", "-y", "azure-cli"])
