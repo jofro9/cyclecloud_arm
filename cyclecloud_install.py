@@ -476,11 +476,11 @@ def install_pre_req():
     # Taken from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum?view=azure-cli-latest
 
     if "ubuntu" in str(platform.version()).lower():
-        _catch_sys_error(["apt", "update", "-y"])
+        run(["apt", "update", "-y"])
         run(["apt", "install", "-y", "openjdk-8-jre-headless"])
-        _catch_sys_error(["apt", "install", "-y", "unzip"])
-        _catch_sys_error(["apt", "install", "-y", "python3-venv"])
-        _catch_sys_error(["apt", "install", "-y", "azure-cli"])
+        run(["apt", "install", "-y", "unzip"])
+        run(["apt", "install", "-y", "python3-venv"])
+        run(["apt", "install", "-y", "azure-cli"])
     else:
         _catch_sys_error(["yum", "install", "-y", "java-1.8.0-openjdk-headless"])
         _catch_sys_error(["yum", "install", "-y", "azure-cli"])
