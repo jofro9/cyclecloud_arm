@@ -234,7 +234,7 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
     if no_default_account:
         print("Skipping default account creation (--noDefaultAccount).") 
     else:
-        output =  _catch_sys_error(["/usr/local/bin/cyclecloud", "account", "show", "azure"])
+        output =  run(["/usr/local/bin/cyclecloud", "account", "show", "azure"])
         if 'Credentials: azure' in str(output):
             print("Account \"azure\" already exists.   Skipping account setup...")
         else:
