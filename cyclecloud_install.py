@@ -427,8 +427,7 @@ def configure_msft_repos():
 def configure_msft_apt_repos():
     print("Configuring Microsoft apt repository for CycleCloud install")
     run(
-        "sudo wget -q -O /tmp/microsoft.asc https://packages.microsoft.com/keys/microsoft.asc",
-        shell=True,
+        "wget -q -O /tmp/microsoft.asc https://packages.microsoft.com/keys/microsoft.asc",
         check=True,
         capture_output=True,
     )
