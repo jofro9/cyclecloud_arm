@@ -19,7 +19,7 @@ from time import sleep
 tmpdir = mkdtemp()
 print("Creating temp directory {} for installing CycleCloud".format(tmpdir))
 cycle_root = "/opt/cycle_server"
-cs_cmd = cycle_root + "/cycle_server"
+CS_CMD = cycle_root + "/cycle_server"
 
 
 def clean_up():
@@ -43,12 +43,12 @@ def create_user(username):
         pwd.getpwnam(username)
     except KeyError:
         print('Creating user {}'.format(username))
-        run(["useradd", "-m", "-d", "/home/{}".format(username), username], shell=True, check=True, capture_output=True)
-    run(["chown", "-R", username + ":" + username, "/home/{}".format(username)], shell=True, check=True, capture_output=True)
+        run(["sudo", "useradd", "-m", "-d", "/home/{}".format(username), username], shell=True, check=True, capture_output=True)
+    run(["sudo", "chown", "-R", username + ":" + username, "/home/{}".format(username)], shell=True, check=True, capture_output=True)
 
 def create_keypair(username, public_key=None):
     if not os.path.isdir("/home/{}/.ssh".format(username)):
-        run(["mkdir", "-p", "/home/{}/.ssh".format(username)], shell=True, check=True, capture_output=True)
+        run(["sudo", "mkdir", "-p", "/home/{}/.ssh".format(username)], shell=True, check=True, capture_output=True)
     public_key_file  = "/home/{}/.ssh/id_rsa.pub".format(username)
     if not os.path.exists(public_key_file):
         if public_key:
@@ -56,7 +56,7 @@ def create_keypair(username, public_key=None):
                 pubkeyfile.write(public_key)
                 pubkeyfile.write("\n")
         else:
-            run(["ssh-keygen", "-f", "/home/{}/.ssh/id_rsa".format(username), "-N", ""], shell=True, check=True, capture_output=True)
+            run(["sudo", "ssh-keygen", "-f", "/home/{}/.ssh/id_rsa".format(username), "-N", ""], shell=True, check=True, capture_output=True)
             with open(public_key_file, 'r') as pubkeyfile:
                 public_key = pubkeyfile.read()
 
@@ -69,7 +69,7 @@ def create_keypair(username, public_key=None):
         with open(authorized_key_file, 'w') as authkeyfile:
             authkeyfile.write(public_key)
             authkeyfile.write("\n")
-    run(["chown", "-R", username + ":" + username, "/home/{}".format(username)], shell=True, check=True, capture_output=True)
+    run(["sudo", "chown", "-R", username + ":" + username, "/home/{}".format(username)], shell=True, check=True, capture_output=True)
     return public_key
 
 def create_user_credential(username, public_key=None):
@@ -89,10 +89,10 @@ def create_user_credential(username, public_key=None):
 
     config_path = os.path.join(cycle_root, "config/data/")
     print("Copying config to {}".format(config_path))
-    run(["chown", "cycle_server:cycle_server", credential_data_file], shell=True, check=True, capture_output=True)
+    run(["sudo", "chown", "cycle_server:cycle_server", credential_data_file], shell=True, check=True, capture_output=True)
     # Don't use copy2 here since ownership matters
     # copy2(credential_data_file, config_path)
-    run(["mv", credential_data_file, config_path], shell=True, check=True, capture_output=True)
+    run(["sudo", "mv", credential_data_file, config_path], shell=True, check=True, capture_output=True)
 
 def generate_password_string():
     random_pw_chars = ([random.choice(ascii_lowercase) for _ in range(20)] +
@@ -103,7 +103,7 @@ def generate_password_string():
 
 def reset_cyclecloud_pw(username):
 
-    reset_pw = subprocess.Popen( [cs_cmd, "reset_access", username],
+    reset_pw = subprocess.Popen( [CS_CMD, "reset_access", username],
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, )
@@ -114,8 +114,8 @@ def reset_cyclecloud_pw(username):
     out_split = reset_out.rsplit(None, 1)
     pw = out_split.pop().decode("utf-8")
     print("Disabling forced password reseet for {}".format(username))
-    update_cmd = 'update AuthenticatedUser set ForcePasswordReset = false where Name=="%s"' % (username)
-    run([cs_cmd, 'execute', update_cmd], shell=True, check=True, capture_output=True)
+    update_cmd = 'sudo update AuthenticatedUser set ForcePasswordReset = false where Name=="%s"' % (username)
+    run([CS_CMD, 'execute', update_cmd], shell=True, check=True, capture_output=True)
     return pw 
 
   
@@ -212,10 +212,10 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
         json.dump(account_data, fp)
 
     config_path = os.path.join(cycle_root, "config/data/")
-    run(["chown", "cycle_server:cycle_server", account_data_file], shell=True, check=True, capture_output=True)
+    run(["sudo", "chown", "cycle_server:cycle_server", account_data_file], shell=True, check=True, capture_output=True)
     # Don't use copy2 here since ownership matters
     # copy2(account_data_file, config_path)
-    run(["mv", account_data_file, config_path], shell=True, check=True, capture_output=True)
+    run(["sudo", "mv", account_data_file, config_path], shell=True, check=True, capture_output=True)
     sleep(5)
 
     if not accept_terms:
@@ -267,7 +267,7 @@ def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
 def letsEncrypt(fqdn):
     sleep(60)
     try:
-        cmd_list = [cs_cmd, "keystore", "automatic", "--accept-terms", fqdn]
+        cmd_list = [CS_CMD, "keystore", "automatic", "--accept-terms", fqdn]
         output = check_output(cmd_list)
         print(cmd_list)
         print(output)
@@ -320,7 +320,7 @@ def start_cc():
     import glob
     import subprocess
     print("(Re-)Starting CycleCloud server")
-    run([cs_cmd, "stop"], shell=True, check=True, capture_output=True)
+    run([CS_CMD, "stop"], shell=True, check=True, capture_output=True)
     if glob.glob("/opt/cycle_server/data/ads/corrupt*") or glob.glob("/opt/cycle_server/data/ads/*logfile_failure"):
         print("WARNING: Corrupted datastore masterlog detected.   Restoring from last backup...")
         if not glob.glob("/opt/cycle_server/data/backups/backup-*"):
@@ -335,7 +335,7 @@ def start_cc():
             print("Output: %s" % e.output)
             raise
     
-    run([cs_cmd, "start"], shell=True, check=True, capture_output=True)
+    run([CS_CMD, "start"], shell=True, check=True, capture_output=True)
 
     # # Retry await_startup in case it takes much longer than expected 
     # # (this is common in local testing with limited compute resources)
@@ -344,7 +344,7 @@ def start_cc():
     # while not started:
     #     try:
     #         max_tries -= 1
-    #         run([cs_cmd, "await_startup"])
+    #         run([CS_CMD, "await_startup"])
     #         started = True
     #     except:
     #         if max_tries >  0:
@@ -398,15 +398,13 @@ def install_cc_cli():
 
     print("Unzip and install CLI")
     chdir(tmpdir)
-    run(["apt", "update", "-y"], shell=True, check=True, capture_output=True)
-    run(["apt", "install", "unzip"], shell=True, check=True, capture_output=True)
     run(["unzip", "/opt/cycle_server/tools/cyclecloud-cli.zip"], shell=True, check=True, capture_output=True)
     for cli_install_dir in listdir("."):
         if path.isdir(cli_install_dir) and re.match("cyclecloud-cli-installer", cli_install_dir):
             print("Found CLI install DIR %s" % cli_install_dir)
             chdir(cli_install_dir)
             run(["./install.sh", "--system"], shell=True, check=True, capture_output=True)
-            run("export PATH=${HOME}/bin:$PATH", shell=True, check=True, capture_output=True)
+            run("export PATH-${HOME}/bin:$PATH", shell=True, check=True, capture_output=True)
 
 def already_installed():
     print("Checking for existing Azure CycleCloud install")
@@ -416,7 +414,7 @@ def download_install_cc():
     print("Installing Azure CycleCloud server")
 
     if "ubuntu" in str(platform.version()).lower():
-        run(["apt", "install", "-y", "cyclecloud8"], shell=True, check=True, capture_output=True)
+        run(["sudo", "apt", "install", "-y", "cyclecloud8"], shell=True, check=True, capture_output=True)
     else:
         run(["yum", "install", "-y", "cyclecloud8"])
 
@@ -431,7 +429,7 @@ def configure_msft_apt_repos():
     run(
         ["wget", "-q", "-O", "/tmp/microsoft.asc", "https://packages.microsoft.com/keys/microsoft.asc"], shell=True, check=True, capture_output=True)
     run(
-        ["apt-key", "add", "/tmp/microsoft.asc"], shell=True, check=True, capture_output=True)
+        ["sudo", "apt-key", "add", "/tmp/microsoft.asc"], shell=True, check=True, capture_output=True)
 
     lsb_release = run(["lsb_release", "-cs"], shell=True, check=True, capture_output=True).decode("utf-8").strip()
 
@@ -442,7 +440,7 @@ def configure_msft_apt_repos():
 
     with open('/etc/apt/sources.list.d/cyclecloud.list', 'w') as f:
         f.write("deb [arch=amd64] https://packages.microsoft.com/repos/cyclecloud {} main".format(lsb_release))
-    run(["apt", "update", "-y"], shell=True, check=True, capture_output=True)
+    run(["sudo", "apt", "update", "-y"], shell=True, check=True, capture_output=True)
 
 def configure_msft_yum_repos():
     print("Configuring Microsoft yum repository for CycleCloud install")
@@ -476,10 +474,11 @@ def install_pre_req():
     # Taken from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum?view=azure-cli-latest
 
     if "ubuntu" in str(platform.version()).lower():
-        run(["apt", "update", "-y"], shell=True, check=True, capture_output=True)
-        run(["apt", "install", "-y", "openjdk-8-jre-headless"], shell=True, check=True, capture_output=True)
-        run(["apt", "install", "-y", "python3-venv"], shell=True, check=True, capture_output=True)
-        run(["apt", "install", "-y", "azure-cli"], shell=True, check=True, capture_output=True)
+        run("sudo apt-get update -y", shell=True, check=True, capture_output=True)
+        run("sudo apt-get install -y openjdk-8-jre-headless", shell=True, check=True, capture_output=True)
+        run("sudo apt-get install -y unzip", shell=True, check=True, capture_output=True)
+        run("sudo apt-get install -y python3-venv", shell=True, check=True, capture_output=True)
+        run("sudo apt-get install -y azure-cli", shell=True, check=True, capture_output=True)
     else:
         run(["yum", "install", "-y", "java-1.8.0-openjdk-headless"], shell=True, check=True, capture_output=True)
         run(["yum", "install", "-y", "azure-cli"], shell=True, check=True, capture_output=True)
