@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # Prepare an Azure provider account for CycleCloud usage.
 import os
 import argparse
@@ -113,6 +112,7 @@ def reset_cyclecloud_pw(username):
     if reset_err:
         print("Password reset error: %s" % (reset_err))
     out_split = reset_out.rsplit(None, 1)
+    print(out_split)
     pw = out_split.pop().decode("utf-8")
     print("Disabling forced password reseet for {}".format(username))
     update_cmd = 'update AuthenticatedUser set ForcePasswordReset = false where Name=="%s"' % (username)
@@ -234,7 +234,7 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
     if no_default_account:
         print("Skipping default account creation (--noDefaultAccount).") 
     else:
-        output =  run(["/usr/local/bin/cyclecloud", "account", "show", "azure"], shell=True, check=True, capture_output=True)
+        output =  run("cyclecloud account show azure", shell=True, check=True, capture_output=True)
         if 'Credentials: azure' in str(output):
             print("Account \"azure\" already exists.   Skipping account setup...")
         else:
@@ -251,7 +251,7 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
 
             # create the cloud provide account
             print("Registering Azure subscription in CycleCloud")
-            run(["/usr/local/bin/cyclecloud", "account", "create", "-f", azure_data_file], shell=True, check=True, capture_output=True)
+            run(f"cyclecloud account create -f {azure_data_file}", shell=True, check=True, capture_output=True)
 
 
 def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
@@ -264,7 +264,7 @@ def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
     run(
     "".join(
         [
-            "/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --force "
+            "cyclecloud initialize --loglevel=debug --batch --force "
             f"--url=https://localhost:{webserver_port} --verify-ssl=false --username={admin_user} ",
             password_flag
         ]
@@ -331,7 +331,7 @@ def start_cc():
     import glob
     import subprocess
     print("(Re-)Starting CycleCloud server")
-    run([CS_CMD, "stop"], shell=True, check=True, capture_output=True)
+    run(f"{CS_CMD} stop", shell=True, check=True, capture_output=True)
     if glob.glob("/opt/cycle_server/data/ads/corrupt*") or glob.glob("/opt/cycle_server/data/ads/*logfile_failure"):
         print("WARNING: Corrupted datastore masterlog detected.   Restoring from last backup...")
         if not glob.glob("/opt/cycle_server/data/backups/backup-*"):
@@ -396,7 +396,7 @@ def modify_cs_config(options):
     move(tmp_cs_config_file, cs_config_file)
 
     #Ensure that the files are created by the cycleserver service user
-    run("".join(["chown -R cycle_server.", cycle_root]), shell=True, check=True, capture_output=True)
+    run(f"chown -R cycle_server. {cycle_root}", shell=True, check=True, capture_output=True)
 
 def install_cc_cli():
     # CLI comes with an install script but that installation is user specific
@@ -415,8 +415,10 @@ def install_cc_cli():
             print("Found CLI install DIR %s" % cli_install_dir)
             chdir(cli_install_dir)
             print("Installing CycleCloud CLI")
-            run("bash ./install.sh", shell=True, check=True, capture_output=True)
-            run("export PATH=${HOME}/bin:$PATH", check=True, capture_output=True)
+            # run("bash ./install.sh", stdout=subprocess.PIPE, shell=True, check=True, capture_output=True)
+            subprocess.Popen("bash ./install.sh", stdout=subprocess.PIPE, shell=True)
+            run(b"export PATH=${HOME}/bin/:$PATH", shell=True)
+            # os.environ['PATH'] = f"/root/bin/:{os.environ['PATH']}"
 
 def already_installed():
     print("Checking for existing Azure CycleCloud install")
