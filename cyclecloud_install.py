@@ -337,20 +337,20 @@ def start_cc():
     
     _catch_sys_error([cs_cmd, "start"])
 
-    # Retry await_startup in case it takes much longer than expected 
-    # (this is common in local testing with limited compute resources)
-    max_tries = 3
-    started = False
-    while not started:
-        try:
-            max_tries -= 1
-            _catch_sys_error([cs_cmd, "await_startup"])
-            started = True
-        except:
-            if max_tries >  0:
-                print("Retrying...")
-            else:
-                raise 
+    # # Retry await_startup in case it takes much longer than expected 
+    # # (this is common in local testing with limited compute resources)
+    # max_tries = 3
+    # started = False
+    # while not started:
+    #     try:
+    #         max_tries -= 1
+    #         _catch_sys_error([cs_cmd, "await_startup"])
+    #         started = True
+    #     except:
+    #         if max_tries >  0:
+    #             print("Retrying...")
+    #         else:
+    #             raise 
 
 
 def modify_cs_config(options):
