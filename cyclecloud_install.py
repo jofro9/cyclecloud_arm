@@ -439,7 +439,11 @@ def configure_msft_apt_repos():
 
     with open('/etc/apt/sources.list.d/cyclecloud.list', 'w') as f:
         f.write("deb [arch=amd64] https://packages.microsoft.com/repos/cyclecloud {} main".format(lsb_release))
-    _catch_sys_error(["apt-get", "update", "-y"])
+
+    # _catch_sys_error(["apt-get", "update", "-y"])
+    run("apt update -y", shell=True, check=True)
+
+
 
 def configure_msft_yum_repos():
     print("Configuring Microsoft yum repository for CycleCloud install")
