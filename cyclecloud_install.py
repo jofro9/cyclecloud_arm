@@ -251,7 +251,7 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
 
             # create the cloud provide account
             print("Registering Azure subscription in CycleCloud")
-            run(f"cyclecloud account create -f {azure_data_file}", shell=True, check=True, capture_output=True)
+            run(f"/usr/local/bin/cyclecloud account create -f {azure_data_file}", shell=True, check=True)
 
 
 def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
@@ -428,7 +428,7 @@ def download_install_cc():
     print("Installing Azure CycleCloud server")
 
     if "ubuntu" in str(platform.version()).lower():
-        run("apt install -y cyclecloud8", shell=True, check=True, capture_output=True)
+        _catch_sys_error(["apt-get", "install", "-y", "cyclecloud8"])
     else:
         run(["yum", "install", "-y", "cyclecloud8"])
 
@@ -440,12 +440,14 @@ def configure_msft_repos():
 
 def configure_msft_apt_repos():
     print("Configuring Microsoft apt repository for CycleCloud install")
+    # _catch_sys_error("wget -q -O /tmp/microsoft.asc https://packages.microsoft.com/keys/microsoft.asc")
     run("wget https://packages.microsoft.com/keys/microsoft.asc", shell=True, check=True, capture_output=True)
     run("mv microsoft.asc /tmp/", shell=True, check=True, capture_output=True)
-    run("apt-key add /tmp/microsoft.asc", shell=True, check=True, capture_output=True)
-
-    lsb_release = run("lsb_release -cs", shell=True, check=True, capture_output=True).stdout.decode("utf-8").strip()
-
+    _catch_sys_error(
+        ["apt-key", "add", "/tmp/microsoft.asc"])
+    
+    # lsb_release = _catch_sys_error(["lsb_release", "-cs"]).decode("utf-8").strip()
+    lsb_release = "bionic"
     with open('/etc/apt/sources.list.d/azure-cli.list', 'w') as f:
         f.write("deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {} main".format(lsb_release))
 
@@ -453,7 +455,7 @@ def configure_msft_apt_repos():
 
     with open('/etc/apt/sources.list.d/cyclecloud.list', 'w') as f:
         f.write("deb [arch=amd64] https://packages.microsoft.com/repos/cyclecloud {} main".format(lsb_release))
-    run("apt-get update -y", shell=True, check=True, capture_output=True)
+    _catch_sys_error(["apt-get", "update", "-y"])
 
 def configure_msft_yum_repos():
     print("Configuring Microsoft yum repository for CycleCloud install")
@@ -487,12 +489,12 @@ def install_pre_req():
     # Taken from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum?view=azure-cli-latest
 
     if "ubuntu" in str(platform.version()).lower():
-        run("apt-get update -y", shell=True, check=True, capture_output=True)
-        run("apt-get install -y wget", shell=True, check=True, capture_output=True)
-        run("apt-get install -y openjdk-8-jre-headless", shell=True, check=True, capture_output=True)
-        run("apt-get install -y unzip", shell=True, check=True, capture_output=True)
-        run("apt-get install -y python3-venv", shell=True, check=True, capture_output=True)
-        run("apt-get install -y azure-cli", shell=True, check=True, capture_output=True)
+        # _catch_sys_error(["apt-get", "update", "-y"])
+        run("apt update -y", shell=True, check=True)
+        _catch_sys_error(["apt-get", "install", "-y", "openjdk-8-jre-headless"])
+        _catch_sys_error(["apt-get", "install", "-y", "unzip"])
+        _catch_sys_error(["apt-get", "install", "-y", "python3-venv"])
+        run("curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash", shell=True, check=True)
     else:
         run(["yum", "install", "-y", "java-1.8.0-openjdk-headless"], shell=True, check=True, capture_output=True)
         run(["yum", "install", "-y", "azure-cli"], shell=True, check=True, capture_output=True)
