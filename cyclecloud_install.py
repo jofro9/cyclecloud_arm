@@ -339,7 +339,7 @@ def start_cc():
 
     # Retry await_startup in case it takes much longer than expected 
     # (this is common in local testing with limited compute resources)
-    max_tries = 3
+    max_tries = 10
     started = False
     while not started:
         try:
