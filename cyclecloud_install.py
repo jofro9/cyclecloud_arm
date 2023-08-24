@@ -265,8 +265,8 @@ def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
     run(
         "/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --force "
         f"--url=https://localhost:{webserver_port} --verify-ssl=false --username={admin_user} {password_flag}",
-        # shell=True,
-        check=True,
+        shell=True,
+        # check=True,
     )
 
 
