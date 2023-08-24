@@ -260,8 +260,14 @@ def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
     password_flag = ("--password=%s" % cyclecloud_admin_pw)
 
     print("Initializing cylcecloud CLI")
-    _catch_sys_error(["/usr/local/bin/cyclecloud", "initialize", "--loglevel=debug", "--batch", "--force",
-                      "--url=https://localhost:{}".format(webserver_port), "--verify-ssl=false", "--username=%s" % admin_user, password_flag])
+    # _catch_sys_error(["/usr/local/bin/cyclecloud", "initialize", "--loglevel=debug", "--batch", "--force",
+    #                   "--url=https://localhost:{}".format(webserver_port), "--verify-ssl=false", "--username=%s" % admin_user, password_flag])
+    run(
+        "/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --force "
+        f"--url=https://localhost:{webserver_port} --verify-ssl=false --username={admin_user} {password_flag}",
+        shell=True,
+        check=True,
+    )
 
 
 def letsEncrypt(fqdn):
@@ -337,20 +343,20 @@ def start_cc():
     
     _catch_sys_error([cs_cmd, "start"])
 
-    # Retry await_startup in case it takes much longer than expected 
-    # (this is common in local testing with limited compute resources)
-    max_tries = 10
-    started = False
-    while not started:
-        try:
-            max_tries -= 1
-            run(f"{cs_cmd} await_startup", shell=True, check=True, capture_output=True)
-            started = True
-        except:
-            if max_tries >  0:
-                print("Retrying...")
-            else:
-                raise 
+    # # Retry await_startup in case it takes much longer than expected 
+    # # (this is common in local testing with limited compute resources)
+    # max_tries = 10
+    # started = False
+    # while not started:
+    #     try:
+    #         max_tries -= 1
+    #         _catch_sys_error([cs_cmd, "await_startup"])
+    #         started = True
+    #     except:
+    #         if max_tries >  0:
+    #             print("Retrying...")
+    #         else:
+    #             raise 
 
 
 def modify_cs_config(options):
