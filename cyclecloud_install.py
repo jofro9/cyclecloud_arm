@@ -260,8 +260,14 @@ def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
     password_flag = ("--password=%s" % cyclecloud_admin_pw)
 
     print("Initializing cylcecloud CLI")
-    _catch_sys_error(["/usr/local/bin/cyclecloud", "initialize", "--loglevel=debug", "--batch", "--force",
-                      "--url=https://localhost:{}".format(webserver_port), "--verify-ssl=false", "--username=%s" % admin_user, password_flag])
+    # _catch_sys_error(["/usr/local/bin/cyclecloud", "initialize", "--loglevel=debug", "--batch", "--force",
+    #                   "--url=https://localhost:{}".format(webserver_port), "--verify-ssl=false", "--username=%s" % admin_user, password_flag])
+    run(
+        "/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --force "
+        f"--url=https://localhost:{webserver_port} --verify-ssl=false --username={admin_user} {password_flag}",
+        shell=True,
+        check=True,
+    )
 
 
 def letsEncrypt(fqdn):
